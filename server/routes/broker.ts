@@ -89,8 +89,8 @@ async function pingMT5Live(): Promise<{ status: 'CONNECTED' | 'DISCONNECTED' | '
     const timeout = setTimeout(() => controller.abort(), 4000);
 
     const url = accountId
-      ? `https://mt-client-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts/${accountId}/information`
-      : 'https://mt-client-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts';
+      ? `https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts/${accountId}`
+      : 'https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts';
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -320,11 +320,29 @@ router.get('/account', async (req: Request, res: Response) => {
     }
   }
 
-  // 2. Fetch MT5 MetaApi Live account info
+  // 2. Fetch MT5 MetaApi Live account info (2-step: provisioning for region, then client API)
   if ((broker === 'all' || broker === 'mt5') && mt5Token && mt5AccountId) {
     try {
+      // Step 1: Get region from provisioning API
+      const provRes = await fetch(
+        `https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts/${mt5AccountId}`,
+        {
+          headers: {
+            'auth-token': mt5Token.trim(),
+            'Content-Type': 'application/json',
+          }
+        }
+      ).catch(() => null);
+
+      let region = 'vint-hill';
+      if (provRes && provRes.ok) {
+        const provData = await provRes.json();
+        region = provData.region || 'vint-hill';
+      }
+
+      // Step 2: Get account info from regional client API
       const mt5Res = await fetch(
-        `https://mt-client-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts/${mt5AccountId}/information`,
+        `https://mt-client-api-v1.${region}.agiliumtrade.ai/users/current/accounts/${mt5AccountId}/account-information`,
         {
           headers: {
             'auth-token': mt5Token.trim(),
@@ -373,6 +391,9 @@ router.get('/account', async (req: Request, res: Response) => {
 /**
  * POST /api/broker/test-connection
  * Tests MetaApi or Binance credentials sent from the frontend UI.
+ * Uses the correct 2-step MetaApi flow:
+ *   Step 1: Provisioning API to get account region & state
+ *   Step 2: Regional Client API to get live balance/equity
  * On success, saves the credentials to keyManager for future use.
  */
 router.post('/test-connection', async (req: Request, res: Response) => {
@@ -387,71 +408,136 @@ router.post('/test-connection', async (req: Request, res: Response) => {
       });
     }
 
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
+    const token = metaApiToken.trim();
+    const accId = accountId.trim();
 
-      const mt5Res = await fetch(
-        `https://mt-client-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts/${accountId.trim()}/information`,
+    try {
+      // Step 1: Query Provisioning API to get account region and deployment state
+      console.log(`[MetaApi] Step 1: Querying Provisioning API for account ${accId}...`);
+      const provController = new AbortController();
+      const provTimeout = setTimeout(() => provController.abort(), 10000);
+
+      const provRes = await fetch(
+        `https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts/${accId}`,
         {
           headers: {
-            'auth-token': metaApiToken.trim(),
+            'auth-token': token,
             'Content-Type': 'application/json',
           },
-          signal: controller.signal,
+          signal: provController.signal,
         }
       );
 
-      clearTimeout(timeout);
+      clearTimeout(provTimeout);
 
-      if (mt5Res.ok) {
-        const mt5Data = await mt5Res.json();
+      if (!provRes.ok) {
+        const provErr = await provRes.text().catch(() => '');
+        let parsedErr: any = {};
+        try { parsedErr = JSON.parse(provErr); } catch {}
+        console.error(`[MetaApi] Provisioning API error: HTTP ${provRes.status}`, provErr);
+        return res.status(provRes.status).json({
+          success: false,
+          status: 'ERROR',
+          error: parsedErr.message || parsedErr.error || `MetaApi Provisioning returned HTTP ${provRes.status}. Check your Token and Account ID.`,
+          details: provErr,
+        });
+      }
+
+      const provData = await provRes.json();
+      const region = provData.region || 'vint-hill';
+      const state = provData.state;
+      console.log(`[MetaApi] Account found. Region: ${region}, State: ${state}, Server: ${provData.server}`);
+
+      // Check if account is deployed
+      if (state !== 'DEPLOYED' && state !== 'DEPLOYING') {
+        return res.status(400).json({
+          success: false,
+          status: 'ERROR',
+          error: `MetaApi account is not deployed (current state: ${state}). Please deploy it from the MetaApi dashboard first.`,
+          accountState: state,
+          region,
+        });
+      }
+
+      // Step 2: Query regional Client API for live account information
+      console.log(`[MetaApi] Step 2: Querying Client API at region ${region}...`);
+      const clientController = new AbortController();
+      const clientTimeout = setTimeout(() => clientController.abort(), 10000);
+
+      const clientUrl = `https://mt-client-api-v1.${region}.agiliumtrade.ai/users/current/accounts/${accId}/account-information`;
+      const clientRes = await fetch(clientUrl, {
+        headers: {
+          'auth-token': token,
+          'Content-Type': 'application/json',
+        },
+        signal: clientController.signal,
+      });
+
+      clearTimeout(clientTimeout);
+
+      if (clientRes.ok) {
+        const mt5Data = await clientRes.json();
+        console.log(`[MetaApi] Connected! Balance: ${mt5Data.balance}, Equity: ${mt5Data.equity}, Server: ${mt5Data.server}`);
 
         // Save valid credentials to keyManager for future requests
         try {
           const { setKey } = await import('../keyManager.js');
-          setKey('mt5', metaApiToken.trim());
-          setKey('mt5_account_id', accountId.trim());
-          console.log('MetaApi credentials saved to keyManager after successful test');
+          setKey('mt5', token);
+          setKey('mt5_account_id', accId);
+          console.log('[MetaApi] Credentials saved to keyManager');
         } catch (saveErr) {
-          console.warn('Could not persist MetaApi credentials to keyManager:', saveErr);
+          console.warn('[MetaApi] Could not persist credentials to keyManager:', saveErr);
         }
 
         return res.json({
           success: true,
           status: 'CONNECTED',
+          region,
           mt5: {
-            login: mt5Data.login || login || '',
-            server: mt5Data.server || server || '',
+            login: mt5Data.login || provData.login || login || '',
+            server: mt5Data.server || provData.server || server || '',
             balance: mt5Data.balance || 0,
             equity: mt5Data.equity || 0,
             freeMargin: mt5Data.freeMargin || 0,
             margin: mt5Data.margin || 0,
             currency: mt5Data.currency || 'USD',
             leverage: mt5Data.leverage || 100,
-            name: 'Live MT5 Account',
+            name: provData.name || 'Live MT5 Account',
             status: 'CONNECTED',
             isLive: true,
           },
         });
       } else {
-        const errText = await mt5Res.text().catch(() => '');
+        const errText = await clientRes.text().catch(() => '');
         let parsedErr: any = {};
         try { parsedErr = JSON.parse(errText); } catch {}
+        console.error(`[MetaApi] Client API error: HTTP ${clientRes.status}`, errText);
 
-        return res.status(mt5Res.status).json({
+        // If account is deploying, it may not be ready yet
+        if (clientRes.status === 404 || (state === 'DEPLOYING')) {
+          return res.status(202).json({
+            success: false,
+            status: 'DEPLOYING',
+            error: 'Account is deploying. Please wait 1-2 minutes and try again.',
+            region,
+          });
+        }
+
+        return res.status(clientRes.status).json({
           success: false,
           status: 'ERROR',
-          error: parsedErr.message || parsedErr.error || `MetaApi returned HTTP ${mt5Res.status}`,
+          error: parsedErr.message || parsedErr.error || `MetaApi Client API returned HTTP ${clientRes.status}`,
           details: errText,
+          region,
         });
       }
     } catch (err: any) {
+      console.error('[MetaApi] Connection test error:', err.message);
       return res.status(500).json({
         success: false,
         status: 'ERROR',
         error: err.name === 'AbortError'
-          ? 'Connection timed out (>8s). Check Account ID and Token.'
+          ? 'Connection timed out (>10s). Check your network and MetaApi credentials.'
           : err.message,
       });
     }
