@@ -1,0 +1,22 @@
+--- src/trading/components/layout/TradingLayout.tsx
++++ src/trading/components/layout/TradingLayout.tsx
+@@ -4,7 +4,6 @@
+ import { LeftDrawingToolbar } from '../chart/LeftDrawingToolbar';
+ import { ProOrderPanel } from '../order-panel/ProOrderPanel';
+ import { BottomPanel } from '../bottom-panel/BottomPanel';
+-import { MarketChartQuickControls } from '../shared/MarketChartQuickControls';
+ 
+ export const TradingLayout: React.FC = () => {
+   return (
+@@ -17,11 +16,6 @@
+         {/* Left Drawing Toolbar */}
+         <LeftDrawingToolbar />
+ 
+-        {/* Market Quick Controls overlay */}
+-        <div className="absolute top-16 right-4 z-40 w-64">
+-          <MarketChartQuickControls />
+-        </div>
+-
+         {/* Chart Area — Full Width */}
+         <div className="flex-1 min-w-0 h-full relative bg-[#0B0E14]">
+           <ChartContainer />

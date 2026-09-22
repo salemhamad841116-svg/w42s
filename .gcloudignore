@@ -1,0 +1,10 @@
+.gcloudignore
+.git
+.gitignore
+node_modules
+dist
+.gemini
+.npm-cache
+.DS_Store
+*.log
+data/*.db

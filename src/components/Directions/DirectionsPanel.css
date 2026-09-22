@@ -1,0 +1,46 @@
+.directions-panel {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  background: var(--bg-glass, rgba(255, 255, 255, 0.9));
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius, 12px);
+  padding: 16px;
+  box-shadow: var(--shadow, 0 4px 12px rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--border-color, rgba(0,0,0,0.1));
+  z-index: 25;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.route-info {
+  display: flex;
+  gap: 24px;
+}
+
+.route-metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent, #4285f4);
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.close-route-btn {
+  border-radius: 50%;
+  background: rgba(0,0,0,0.05);
+}

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "bn-001",
+    "title": "🚨 عاجل: الفيدرالي الأمريكي يعلن قرار الفائدة ومؤتمر صحفي طارئ",
+    "content": "قرر مجلس الفيدرالي الأمريكي إبقاء أسعار الفائدة عند مستوياتها الحالية مع إشارات واضحة إلى خفض وشيك في الاجتماع القادم. تشهد أسواق العملات والذهب تقلبات حادة في الوقت الحالي.",
+    "category": "breaking",
+    "cardColor": "red",
+    "icon": "AlertTriangle",
+    "priority": "urgent",
+    "audience": "all",
+    "status": "archived",
+    "pinned": true,
+    "soundAlert": true,
+    "publishedAt": "2026-08-06T12:22:55.424Z",
+    "expiresAt": "2026-08-07T12:37:55.447Z",
+    "viewersCount": 1420,
+    "dismissalsCount": 38,
+    "readMoreClicksCount": 215,
+    "publishedBy": {
+      "id": "admin-01",
+      "name": "Super Admin",
+      "email": "admin@forex-signals.com",
+      "role": "super_admin"
+    },
+    "createdAt": "2026-08-06T12:07:55.447Z",
+    "updatedAt": "2026-08-28T10:28:15.912Z"
+  },
+  {
+    "id": "bn-002",
+    "title": "📢 تحديث جديد: إضافة خوارزمية التداول الذكي Camarilla V4",
+    "content": "تم تحديث محرك التداول الآلي داخل التطبيق ليدعم استراتيجية كاماريلا الرقمية المتقدمة لجميع مستخدمي باقة VIP والذهب.",
+    "category": "update",
+    "cardColor": "emerald",
+    "icon": "CheckCircle2",
+    "priority": "important",
+    "audience": "gold",
+    "status": "archived",
+    "pinned": false,
+    "soundAlert": false,
+    "publishedAt": "2026-08-06T10:37:55.447Z",
+    "expiresAt": "2026-08-08T12:37:55.447Z",
+    "viewersCount": 890,
+    "dismissalsCount": 12,
+    "readMoreClicksCount": 140,
+    "publishedBy": {
+      "id": "admin-02",
+      "name": "Senior Analyst Admin",
+      "email": "analyst@forex-signals.com",
+      "role": "admin"
+    },
+    "createdAt": "2026-08-06T09:37:55.447Z",
+    "updatedAt": "2026-08-28T10:28:15.912Z"
+  }
+]

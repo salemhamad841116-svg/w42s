@@ -1,0 +1,17 @@
+***************
+*** 189,194 ****
+              </div>
+  
+              {/* Signals Table */}
+              <div className="bg-[#11141c] rounded-2xl border border-zinc-800 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-xs">
+--- 190,197 ----
+              </div>
+  
+              {/* Signals Table */}
++             <MarketChartQuickControls />
++ 
+              <div className="bg-[#11141c] rounded-2xl border border-zinc-800 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-xs">

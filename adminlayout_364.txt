@@ -1,0 +1,29 @@
+Created At: 2026-08-06T18:46:09+04:00
+Completed At: 2026-08-06T18:46:11+04:00
+File Path: `file:///Users/mac/Downloads/forex-signals---%D9%86%D8%B8%D8%A7%D9%85-%D8%A5%D8%B4%D8%A7%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D9%81%D9%88%D8%B1%D9%83%D8%B3/src/components/admin/AdminLayout.tsx`
+Total Lines: 201
+Total Bytes: 9825
+Showing lines 55 to 75
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+55:   useEffect(() => {
+56:     const unsub = globalSystemEnvManager.subscribe(() => {
+57:       setActiveEnv(globalSystemEnvManager.getEnvironment());
+58:       setMaintConfig(globalSystemEnvManager.getMaintenanceConfig());
+59:     });
+60:     return unsub;
+61:   }, []);
+62: 
+63:   const navItems = [
+64:     { id: 'autoRecommendations', labelAr: '🎯 التوصيات الآلية (Auto Signals)', labelEn: 'Auto Recommendations', icon: Sparkles, badge: 'Camarilla ⚡' },
+65:     { id: 'breakingNews', labelAr: '🚨 الأخبار العاجلة (Breaking)', labelEn: 'Breaking News', icon: Flame, badge: 'بث مباشر' },
+66:     { id: 'healthDashboard', labelAr: 'لوحة الصحة والنبض (Health)', labelEn: 'Health Dashboard', icon: Radio, badge: '🟢 8/8 Services' },
+67:     { id: 'overview', labelAr: 'الإحصائيات المباشرة', labelEn: 'Overview', icon: LayoutDashboard },
+68:     { id: 'disasterRecovery', labelAr: 'استعادة الخدمة والكوارث', labelEn: 'Disaster Recovery', icon: ShieldAlert, badge: 'SLA' },
+69:     { id: 'featureFlags', labelAr: 'مفاتيح الميزات (Flags)', labelEn: 'Feature Flags', icon: Sliders, badge: 'Dynamic' },
+70:     { id: 'secretsManager', labelAr: 'إدارة الأسرار والمفاتيح', labelEn: 'Secrets Vault', icon: Key, badge: 'Rotation' },
+71:     { id: 'errorMonitoring', labelAr: 'مراقبة الأخطاء والاستثناءات', labelEn: 'Crash Logs', icon: Bug },
+72:     { id: 'loadTesting', labelAr: 'اختبار الأحمال والشواهد', labelEn: 'Load Testing', icon: Activity, badge: '5k Users' },
+73:     { id: 'securityAudit', labelAr: 'المراجعة الأمنية والتحصين', labelEn: 'Security Audit', icon: ShieldCheck, badge: 'OWASP' },
+74:     { id: 'liveMonitoring', labelAr: 'لوحة المراقبة المباشرة', labelEn: 'Live Telemetry', icon: Activity, badge: 'مباشر' },
+75:     { id: 'signalHistory', labelAr: 'سجل جميع الإشارات', labelEn: 'Signal History', icon: History, badge: 'أرشيف' },
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

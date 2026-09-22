@@ -1,0 +1,49 @@
+.favorites-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.favorite-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.05));
+}
+
+.favorite-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.favorite-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.favorite-name {
+  font-weight: 500;
+  color: var(--text-primary, #333);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.favorite-address {
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.favorites-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-secondary, #666);
+}

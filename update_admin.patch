@@ -1,0 +1,19 @@
+--- src/AdminApp.tsx
++++ src/AdminApp.tsx
+@@ -5,6 +5,7 @@
+ import { AdminStrategiesManager } from './components/admin/AdminStrategiesManager';
+ import { AdminAutoRecommendations } from './components/admin/AdminAutoRecommendations';
+ import { AdminBreakingNews } from './components/admin/AdminBreakingNews';
++import { MarketChartQuickControls } from './trading/components/shared/MarketChartQuickControls';
+ import { AdminBrokerAccounts } from './components/admin/AdminBrokerAccounts';
+ import {
+   Radio,
+@@ -190,6 +191,8 @@
+             </div>
+ 
+             {/* Signals Table */}
++            <MarketChartQuickControls />
++
+             <div className="bg-[#11141c] rounded-2xl border border-zinc-800 overflow-hidden">
+               <div className="overflow-x-auto">
+                 <table className="w-full text-right text-xs">

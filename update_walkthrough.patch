@@ -1,0 +1,26 @@
+--- /Users/mac/.gemini/antigravity/brain/0c4455f2-aab9-41a1-8f8d-a24f2e1dd372/walkthrough.md
++++ /Users/mac/.gemini/antigravity/brain/0c4455f2-aab9-41a1-8f8d-a24f2e1dd372/walkthrough.md
+@@ -101,3 +101,23 @@
+ - **Binance Testnet**: Integration uses native `crypto.subtle` API for HMAC-SHA256 signature generation without any external dependencies. Handles time syncing and valid timestamp requirements.
+ - **MetaApi SDK**: Configured `brokerStore.ts` to connect to MetaTrader 5 demo accounts.
+ - Unified broker status is now correctly displayed in the `HeaderBar`.
++
++---
++
++## 3. Market Chart Quick Controls
++
++تم بنجاح تنفيذ متطلبات شريط التحكم السريع (Quick Controls) ليظهر أعلى مناطق جداول البيانات.
++
++### المكونات المضافة:
++- **`MarketChartQuickControls`**: تم إنشاء مكون جديد كلياً يعتمد على تصميم `White Glass` مع خلفية زجاجية، حدود خفيفة، وتأثيرات بصرية عند التمرير والضغط (`Hover/Pressed`).
++
++### تفاصيل الأشرطة:
++- **الشريط الأول (Primary Action Row)**: يحتوي على زر دائري مركزي `(+)` لفتح الرسم البياني للزوج المحدد حالياً (يعتمد على `useChartStore`).
++- **الشريط الثاني (Chart Quick Controls Row)**: يضم الأزرار السريعة التالية:
++  1. الإطار الزمني (Time)
++  2. الشموع (Candles)
++  3. المؤشرات (Indicators)
++  4. منبه (Alert)
++
++### مواقع الإضافة:
++- تمت إضافة المكون الجديد إلى **`TradingLayout`** (المنصة العامة) وإلى **`AdminApp`** (لوحة الإدارة) لضمان توحيد التصميم والسلوك كما طُلب.

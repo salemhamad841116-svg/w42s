@@ -1,0 +1,36 @@
+***************
+*** 4,9 ****
+  import { LeftDrawingToolbar } from '../chart/LeftDrawingToolbar';
+  import { ProOrderPanel } from '../order-panel/ProOrderPanel';
+  import { BottomPanel } from '../bottom-panel/BottomPanel';
+  
+  export const TradingLayout: React.FC = () => {
+    return (
+--- 4,10 ----
+  import { LeftDrawingToolbar } from '../chart/LeftDrawingToolbar';
+  import { ProOrderPanel } from '../order-panel/ProOrderPanel';
+  import { BottomPanel } from '../bottom-panel/BottomPanel';
++ import { MarketChartQuickControls } from '../shared/MarketChartQuickControls';
+  
+  export const TradingLayout: React.FC = () => {
+    return (
+***************
+*** 16,21 ****
+          {/* Left Drawing Toolbar */}
+          <LeftDrawingToolbar />
+  
+          {/* Chart Area — Full Width */}
+          <div className="flex-1 min-w-0 h-full relative bg-[#0B0E14]">
+            <ChartContainer />
+--- 17,27 ----
+          {/* Left Drawing Toolbar */}
+          <LeftDrawingToolbar />
+  
++         {/* Market Quick Controls overlay */}
++         <div className="absolute top-16 right-4 z-40 w-64">
++           <MarketChartQuickControls />
++         </div>
++ 
+          {/* Chart Area — Full Width */}
+          <div className="flex-1 min-w-0 h-full relative bg-[#0B0E14]">
+            <ChartContainer />

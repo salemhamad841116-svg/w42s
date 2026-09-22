@@ -1,0 +1,88 @@
+Created At: 2026-08-06T16:46:46+04:00
+Completed At: 2026-08-06T16:46:49+04:00
+File Path: `file:///Users/mac/Downloads/forex-signals---%D9%86%D8%B8%D8%A7%D9%85-%D8%A5%D8%B4%D8%A7%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D9%81%D9%88%D8%B1%D9%83%D8%B3/src/components/admin/AdminLayout.tsx`
+Total Lines: 199
+Total Bytes: 9643
+Showing lines 1 to 80
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import React, { useState, useEffect } from 'react';
+2: import { AdminUser, Language } from '../../types';
+3: import { globalSystemEnvManager } from '../../engine/SystemEnvironmentManager';
+4: import {
+5:   LayoutDashboard,
+6:   Users,
+7:   Zap,
+8:   Camera,
+9:   Bell,
+10:   BarChart3,
+11:   ShieldCheck,
+12:   LogOut,
+13:   Globe,
+14:   Lock,
+15:   ChevronRight,
+16:   ExternalLink,
+17:   Flame,
+18:   Key,
+19:   Bot,
+20:   Server,
+21:   Code,
+22:   History,
+23:   Activity,
+24:   FileText,
+25:   ShieldAlert,
+26:   Sliders,
+27:   Bug,
+28:   Radio,
+29: } from 'lucide-react';
+30: 
+31: interface AdminLayoutProps {
+32:   currentAdmin: AdminUser;
+33:   onLogoutAdmin: () => void;
+34:   onReturnToMainApp: () => void;
+35:   activeTab: string;
+36:   setActiveTab: (tab: string) => void;
+37:   children: React.ReactNode;
+38:   lang: Language;
+39: }
+40: 
+41: export const AdminLayout: React.FC<AdminLayoutProps> = ({
+42:   currentAdmin,
+43:   onLogoutAdmin,
+44:   onReturnToMainApp,
+45:   activeTab,
+46:   setActiveTab,
+47:   children,
+48:   lang,
+49: }) => {
+50:   const isAr = lang === 'ar';
+51:   const [activeEnv, setActiveEnv] = useState(globalSystemEnvManager.getEnvironment());
+52:   const [maintConfig, setMaintConfig] = useState(globalSystemEnvManager.getMaintenanceConfig());
+53: 
+54:   useEffect(() => {
+55:     const unsub = globalSystemEnvManager.subscribe(() => {
+56:       setActiveEnv(globalSystemEnvManager.getEnvironment());
+57:       setMaintConfig(globalSystemEnvManager.getMaintenanceConfig());
+58:     });
+59:     return unsub;
+60:   }, []);
+61: 
+62:   const navItems = [
+63:     { id: 'breakingNews', labelAr: '🚨 الأخبار العاجلة (Breaking)', labelEn: 'Breaking News', icon: Flame, badge: 'بث مباشر' },
+64:     { id: 'healthDashboard', labelAr: 'لوحة الصحة والنبض (Health)', labelEn: 'Health Dashboard', icon: Radio, badge: '🟢 8/8 Services' },
+65:     { id: 'overview', labelAr: 'الإحصائيات المباشرة', labelEn: 'Overview', icon: LayoutDashboard },
+66:     { id: 'disasterRecovery', labelAr: 'استعادة الخدمة والكوارث', labelEn: 'Disaster Recovery', icon: ShieldAlert, badge: 'SLA' },
+67:     { id: 'featureFlags', labelAr: 'مفاتيح الميزات (Flags)', labelEn: 'Feature Flags', icon: Sliders, badge: 'Dynamic' },
+68:     { id: 'secretsManager', labelAr: 'إدارة الأسرار والمفاتيح', labelEn: 'Secrets Vault', icon: Key, badge: 'Rotation' },
+69:     { id: 'errorMonitoring', labelAr: 'مراقبة الأخطاء والاستثناءات', labelEn: 'Crash Logs', icon: Bug },
+70:     { id: 'loadTesting', labelAr: 'اختبار الأحمال والشواهد', labelEn: 'Load Testing', icon: Activity, badge: '5k Users' },
+71:     { id: 'securityAudit', labelAr: 'المراجعة الأمنية والتحصين', labelEn: 'Security Audit', icon: ShieldCheck, badge: 'OWASP' },
+72:     { id: 'liveMonitoring', labelAr: 'لوحة المراقبة المباشرة', labelEn: 'Live Telemetry', icon: Activity, badge: 'مباشر' },
+73:     { id: 'signalHistory', labelAr: 'سجل جميع الإشارات', labelEn: 'Signal History', icon: History, badge: 'أرشيف' },
+74:     { id: 'activityTimeline', labelAr: 'سجل النشاط والعمليات', labelEn: 'Activity Timeline', icon: FileText },
+75:     { id: 'pinescript', labelAr: 'وحدة الاستراتيجية (Camarilla.ts)', labelEn: 'Camarilla Strategy', icon: Code, badge: 'TS Engine' },
+76:     { id: 'autoEngine', labelAr: 'محرك التداول الآلي', labelEn: 'Auto Engine', icon: Bot, badge: 'آلي 24/7' },
+77:     { id: 'infrastructure', labelAr: 'البنية التحتية والمراقبة', labelEn: 'Infrastructure', icon: Server, badge: 'Enterprise' },
+78:     { id: 'users', labelAr: 'إدارة المستخدمين والأجهزة', labelEn: 'Users & Devices', icon: Users },
+79:     { id: 'signals', labelAr: 'إدارة الإشارات', labelEn: 'Signals', icon: Zap },
+80:     { id: 'screenshots', labelAr: 'إحصائيات لقطات الشاشة', labelEn: 'Screenshots', icon: Camera, badge: 'جديد' },
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

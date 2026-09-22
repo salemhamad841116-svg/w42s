@@ -1,0 +1,22 @@
+[
+  {
+    "id": "audit-1787912895922-812",
+    "newsId": "bn-002",
+    "newsTitle": "📢 تحديث جديد: إضافة خوارزمية التداول الذكي Camarilla V4",
+    "action": "archive",
+    "performedBy": "System Scheduler",
+    "role": "system",
+    "timestamp": "2026-08-28T10:28:15.922Z",
+    "details": "Auto-archived due to expiration"
+  },
+  {
+    "id": "audit-1787912895919-240",
+    "newsId": "bn-001",
+    "newsTitle": "🚨 عاجل: الفيدرالي الأمريكي يعلن قرار الفائدة ومؤتمر صحفي طارئ",
+    "action": "archive",
+    "performedBy": "System Scheduler",
+    "role": "system",
+    "timestamp": "2026-08-28T10:28:15.919Z",
+    "details": "Auto-archived due to expiration"
+  }
+]

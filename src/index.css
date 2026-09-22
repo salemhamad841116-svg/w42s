@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+  --color-surface-primary: #0B0E14;
+  --color-surface-secondary: #151924;
+  --color-surface-tertiary: #1C2030;
+  --color-surface-hover: #1E2336;
+  --color-surface-active: #252A3A;
+  --color-border-default: #262B3D;
+  --color-border-subtle: #1E2336;
+  --color-border-strong: #3A4158;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #8F9CAE;
+  --color-text-tertiary: #5E6A7E;
+  --color-bullish: #00C087;
+  --color-bullish-hover: #00D99A;
+  --color-bearish: #F23645;
+  --color-bearish-hover: #FF4D5C;
+  --color-accent-blue: #2962FF;
+}
+
+/* Custom dark scrollbar for trading interface */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0E14;
+}
+::-webkit-scrollbar-thumb {
+  background: #262B3D;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3A4158;
+}
