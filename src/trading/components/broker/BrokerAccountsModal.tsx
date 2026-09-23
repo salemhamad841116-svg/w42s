@@ -22,6 +22,10 @@ import { useBrokerStore, BrokerType } from '../../stores/brokerStore';
 import { brokerService } from '../../services/brokerService';
 
 const MT5_COMMON_SERVERS = [
+  'adss-Live3',
+  'adss-Live2',
+  'adss-Live',
+  'adss-Demo',
   'Exness-Trial01',
   'MetaQuotes-Demo',
   'ICMarkets-Demo01',
@@ -302,24 +306,50 @@ export const BrokerAccountsModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
-                <div className="flex items-center gap-2">
-                  <span className={`w-2.5 h-2.5 rounded-full ${mt5Account.status === 'CONNECTED' ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-zinc-500'}`} />
-                  <span className="text-xs text-zinc-400">
-                    الحالة: {mt5Account.status === 'CONNECTED' ? 'متصل بنجاح' : 'غير متصل'}
-                  </span>
-                </div>
+              {/* Action Buttons & Status */}
+              <div className="space-y-2 pt-2 border-t border-zinc-800">
+                {/* Error message display */}
+                {mt5Account.error && (mt5Account.status === 'ERROR' || mt5Account.status === 'DISCONNECTED') && (
+                  <div className="p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 font-mono flex items-start gap-2">
+                    <AlertCircle size={14} className="mt-0.5 flex-shrink-0 text-rose-400" />
+                    <span dir="ltr">{mt5Account.error}</span>
+                  </div>
+                )}
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleTestMT5}
-                    disabled={testingMT5}
-                    className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-black text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <RefreshCw size={14} className={testingMT5 ? 'animate-spin' : ''} />
-                    <span>فحص الاتصال وجلب الرصيد</span>
-                  </button>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full transition-all ${
+                      mt5Account.status === 'CONNECTED'
+                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]'
+                        : mt5Account.status === 'CONNECTING'
+                          ? 'bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.4)]'
+                          : mt5Account.status === 'ERROR'
+                            ? 'bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.4)]'
+                            : 'bg-zinc-500'
+                    }`} />
+                    <span className={`text-xs font-bold ${
+                      mt5Account.status === 'CONNECTED' ? 'text-emerald-400' :
+                      mt5Account.status === 'CONNECTING' ? 'text-amber-400' :
+                      mt5Account.status === 'ERROR' ? 'text-rose-400' :
+                      'text-zinc-400'
+                    }`}>
+                      {mt5Account.status === 'CONNECTED' && `تم الاتصال بنجاح (${mt5Account.server})`}
+                      {mt5Account.status === 'CONNECTING' && 'جاري الاتصال...'}
+                      {mt5Account.status === 'ERROR' && 'فشل الاتصال'}
+                      {mt5Account.status === 'DISCONNECTED' && 'غير متصل'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleTestMT5}
+                      disabled={testingMT5}
+                      className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-black text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <RefreshCw size={14} className={testingMT5 ? 'animate-spin' : ''} />
+                      <span>{testingMT5 ? 'جاري الفحص...' : 'فحص الاتصال وجلب الرصيد'}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
