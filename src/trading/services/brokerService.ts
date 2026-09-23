@@ -57,121 +57,82 @@ class BrokerService {
 
   /**
    * 1. Test MT5 Connection and fetch account info (Live MetaApi or Demo)
-   * Sends credentials to the backend which tests them server-side (avoids CORS).
+   * Sends credentials to the backend which tests them server-side (avoids CORS & IP issues).
    */
   public async testMT5Connection(credentials: MT5Credentials): Promise<boolean> {
     const store = useBrokerStore.getState();
     store.setMT5Account({ status: 'CONNECTING', error: undefined });
 
     const isLive = credentials.isLive !== false;
+    const token = (credentials.metaApiToken || '').trim();
+    const accountId = (credentials.accountId || '').trim();
 
-    try {
-      // 1. Primary: Use the server-side test-connection endpoint
-      //    This sends credentials to the backend, which tests them against MetaApi
-      //    without CORS issues, and saves them to keyManager on success.
-      if (credentials.metaApiToken && credentials.accountId) {
-        try {
-          const testRes = await fetch('/api/broker/test-connection', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              broker: 'mt5',
-              metaApiToken: credentials.metaApiToken.trim(),
-              accountId: credentials.accountId.trim(),
-              login: credentials.login,
-              server: credentials.server,
-            }),
-          });
-
-          const testData = await testRes.json();
-
-          if (testRes.ok && testData.success && testData.mt5) {
-            store.setMT5Account({
-              login: testData.mt5.login || credentials.login || '',
-              server: testData.mt5.server || credentials.server || '',
-              balance: testData.mt5.balance ?? 0,
-              equity: testData.mt5.equity ?? 0,
-              freeMargin: testData.mt5.freeMargin ?? 0,
-              margin: testData.mt5.margin ?? 0,
-              currency: testData.mt5.currency || 'USD',
-              leverage: testData.mt5.leverage || 100,
-              name: isLive ? 'Live MT5 Account' : 'Demo MT5 Account',
-              status: 'CONNECTED',
-              isLive,
-              lastSyncTime: Date.now(),
-            });
-            return true;
-          } else {
-            // Server tested but returned an error from MetaApi
-            store.setMT5Account({
-              login: credentials.login || '',
-              server: credentials.server || '',
-              balance: 0,
-              equity: 0,
-              freeMargin: 0,
-              margin: 0,
-              currency: 'USD',
-              leverage: 100,
-              name: isLive ? 'Live MT5 Account' : 'Demo MT5 Account',
-              status: 'ERROR',
-              isLive,
-              error: testData.error || 'MetaApi connection test failed',
-            });
-            return false;
-          }
-        } catch (testErr) {
-          console.warn('Server-side test-connection failed:', testErr);
-        }
-      }
-
-      // 2. Fallback: Query backend broker account endpoint (uses server env vars)
-      try {
-        const serverRes = await fetch('/api/broker/account?broker=mt5').catch(() => null);
-        if (serverRes && serverRes.ok) {
-          const serverData = await serverRes.json();
-          if (serverData.mt5 && serverData.mt5.status === 'CONNECTED') {
-            store.setMT5Account({
-              login: serverData.mt5.login || credentials.login || '',
-              server: serverData.mt5.server || credentials.server || '',
-              balance: serverData.mt5.balance ?? 0,
-              equity: serverData.mt5.equity ?? 0,
-              freeMargin: serverData.mt5.freeMargin ?? 0,
-              margin: serverData.mt5.margin ?? 0,
-              currency: serverData.mt5.currency || 'USD',
-              leverage: serverData.mt5.leverage || 100,
-              name: isLive ? 'Live MT5 Account' : 'Demo MT5 Account',
-              status: 'CONNECTED',
-              isLive,
-              lastSyncTime: Date.now(),
-            });
-            return true;
-          }
-        }
-      } catch (backendErr) {
-        console.warn('Backend MT5 account check failed:', backendErr);
-      }
-
-      // All connection attempts failed
+    if (!token || !accountId) {
+      const errMsg = 'يرجى إدخال MetaApi Cloud Token و MetaApi Account ID أولاً للاتصال بالوسيط';
       store.setMT5Account({
+        status: 'ERROR',
+        error: errMsg,
         login: credentials.login || '',
         server: credentials.server || '',
-        balance: 0,
-        equity: 0,
-        freeMargin: 0,
-        margin: 0,
-        currency: 'USD',
-        leverage: 100,
-        name: isLive ? 'Live MT5 Account' : 'Demo MT5 Account',
-        status: 'DISCONNECTED',
-        isLive,
-        error: 'Could not connect to MetaApi. Verify Account ID and Token.',
+      });
+      return false;
+    }
+
+    try {
+      const testRes = await fetch('/api/broker/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          broker: 'mt5',
+          metaApiToken: token,
+          accountId: accountId,
+          login: credentials.login,
+          server: credentials.server,
+        }),
       });
 
-      return false;
+      const testData = await testRes.json().catch(() => ({}));
+
+      if (testRes.ok && testData.success && testData.mt5) {
+        store.setMT5Account({
+          login: testData.mt5.login || credentials.login || '',
+          server: testData.mt5.server || credentials.server || '',
+          balance: testData.mt5.balance ?? 0,
+          equity: testData.mt5.equity ?? 0,
+          freeMargin: testData.mt5.freeMargin ?? 0,
+          margin: testData.mt5.margin ?? 0,
+          marginLevel: testData.mt5.marginLevel ?? 0,
+          currency: testData.mt5.currency || 'USD',
+          leverage: testData.mt5.leverage || 100,
+          name: isLive ? 'Live MT5 Account' : 'Demo MT5 Account',
+          status: 'CONNECTED',
+          isLive,
+          error: undefined,
+          lastSyncTime: Date.now(),
+        });
+        return true;
+      } else {
+        const errorDetail = testData.error || `MetaApi connection failed (HTTP ${testRes.status})`;
+        store.setMT5Account({
+          login: credentials.login || '',
+          server: credentials.server || '',
+          balance: 0,
+          equity: 0,
+          freeMargin: 0,
+          margin: 0,
+          currency: 'USD',
+          leverage: 100,
+          name: isLive ? 'Live MT5 Account' : 'Demo MT5 Account',
+          status: 'ERROR',
+          isLive,
+          error: errorDetail,
+        });
+        return false;
+      }
     } catch (err: any) {
       store.setMT5Account({
         status: 'ERROR',
-        error: err.message || 'Failed to connect to MT5 server',
+        error: err.message || 'Failed to send test request to backend server',
       });
       return false;
     }
@@ -186,97 +147,51 @@ class BrokerService {
 
     const isFutures = credentials.network === 'futures';
     const isLive = credentials.isLive !== false;
+    const apiKey = (credentials.apiKey || '').trim();
+    const apiSecret = (credentials.apiSecret || '').trim();
 
     try {
-      // 1. First attempt: Query backend broker API endpoint
-      try {
-        const serverRes = await fetch('/api/broker/account?broker=binance').catch(() => null);
-        if (serverRes && serverRes.ok) {
-          const serverData = await serverRes.json();
-          if (serverData.binance && (serverData.binance.status === 'CONNECTED' || serverData.binance.balanceUSDT !== undefined)) {
-            store.setBinanceAccount({
-              balanceUSDT: serverData.binance.balanceUSDT ?? 0,
-              availableUSDT: serverData.binance.availableUSDT ?? 0,
-              totalWalletBalance: serverData.binance.totalWalletBalance ?? 0,
-              status: 'CONNECTED',
-              isLive,
-              lastSyncTime: Date.now(),
-            });
-            return true;
-          }
-        }
-      } catch (backendErr) {
-        console.warn('Backend Binance check failed, checking direct credentials', backendErr);
-      }
-
-      // Route to Binance Live Mainnet or Testnet
-      const baseUrl = isFutures
-        ? (isLive ? 'https://fapi.binance.com' : 'https://testnet.binancefuture.com')
-        : (isLive ? 'https://api.binance.com' : 'https://testnet.binance.vision');
-
-      const endpoint = isFutures ? '/fapi/v2/account' : '/api/v3/account';
-
-      if (credentials.apiKey && credentials.apiSecret) {
-        const timestamp = Date.now();
-        const queryString = `timestamp=${timestamp}`;
-        const signature = await this.createHmacSha256(credentials.apiSecret, queryString);
-        const url = `${baseUrl}${endpoint}?${queryString}&signature=${signature}`;
-
-        try {
-          const res = await fetch(url, {
-            headers: {
-              'X-MBX-APIKEY': credentials.apiKey,
-            },
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            let usdtBalance = 0;
-            let available = 0;
-
-            if (isFutures && data.assets) {
-              const usdt = data.assets.find((a: any) => a.asset === 'USDT');
-              if (usdt) {
-                usdtBalance = parseFloat(usdt.walletBalance);
-                available = parseFloat(usdt.availableBalance);
-              }
-            } else if (data.balances) {
-              const usdt = data.balances.find((b: any) => b.asset === 'USDT');
-              if (usdt) {
-                usdtBalance = parseFloat(usdt.free) + parseFloat(usdt.locked);
-                available = parseFloat(usdt.free);
-              }
-            }
-
-            store.setBinanceAccount({
-              balanceUSDT: usdtBalance,
-              availableUSDT: available,
-              totalWalletBalance: usdtBalance,
-              status: 'CONNECTED',
-              isLive,
-              lastSyncTime: Date.now(),
-            });
-            return true;
-          }
-        } catch (apiErr) {
-          console.warn('Binance API fetch error, applying verified connection bridge', apiErr);
-        }
-      }
-
-      // All connection attempts failed - report disconnected
-      store.setBinanceAccount({
-        balanceUSDT: 0,
-        availableUSDT: 0,
-        totalWalletBalance: 0,
-        status: 'DISCONNECTED',
-        isLive,
-        error: 'Could not fetch live Binance account data. Check server credentials or region restrictions.',
+      // 1. Send to server backend to test safely via Cloud NAT / static IP
+      const testRes = await fetch('/api/broker/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          broker: 'binance',
+          apiKey,
+          apiSecret,
+          network: credentials.network || 'futures',
+          isLive,
+        }),
       });
-      return false;
+
+      const testData = await testRes.json().catch(() => ({}));
+
+      if (testRes.ok && testData.success && testData.binance) {
+        store.setBinanceAccount({
+          balanceUSDT: testData.binance.balanceUSDT ?? 0,
+          availableUSDT: testData.binance.availableUSDT ?? 0,
+          totalWalletBalance: testData.binance.totalWalletBalance ?? 0,
+          status: 'CONNECTED',
+          isLive,
+          error: undefined,
+          lastSyncTime: Date.now(),
+        });
+        return true;
+      } else {
+        store.setBinanceAccount({
+          balanceUSDT: 0,
+          availableUSDT: 0,
+          totalWalletBalance: 0,
+          status: 'ERROR',
+          isLive,
+          error: testData.error || `Binance connection failed (HTTP ${testRes.status})`,
+        });
+        return false;
+      }
     } catch (err: any) {
       store.setBinanceAccount({
         status: 'ERROR',
-        error: err.message || 'Failed to connect to Binance',
+        error: err.message || 'Failed to connect to Binance server',
       });
       return false;
     }

@@ -250,14 +250,20 @@ export const UserActionPanel: React.FC = () => {
             </button>
           </div>
 
-          {/* Broker Demo Accounts Section (حسابات الوسطاء التجريبية) */}
-          <div className="mb-2.5 bg-[#12151F] border border-[#262B3D] rounded-lg p-2.5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold text-white flex items-center gap-1.5">
-                <Wallet size={13} className="text-[#2962FF]" />
-                حسابات الوسطاء التجريبية
+          {/* Broker Live & Demo Accounts Management Center */}
+          <div className="mb-2.5 bg-[#12151F] border border-[#262B3D] rounded-xl p-3 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Wallet size={14} className="text-amber-400" />
+                <span>حسابات التداول والوسطاء</span>
               </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-bold">
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold border ${
+                activeBroker === 'MT5_LIVE'
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                  : activeBroker === 'BINANCE_LIVE'
+                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                  : 'bg-zinc-800 text-zinc-300 border-zinc-700'
+              }`}>
                 {activeBroker === 'MT5_LIVE'
                   ? 'MT5 Live ⚡'
                   : activeBroker === 'BINANCE_LIVE'
@@ -270,65 +276,60 @@ export const UserActionPanel: React.FC = () => {
               </span>
             </div>
 
-            {/* Current Active Account Card */}
-            <div className="p-2 rounded bg-[#1A1F2C] border border-[#2A3144] mb-2 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            {/* Current Active Account Live Stats Card */}
+            <div className="p-2.5 rounded-lg bg-[#181D2B] border border-[#2A3144] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
                 <span
-                  className={`w-2 h-2 rounded-full ${
-                    activeBroker === 'MT5_LIVE' || activeBroker === 'MT5_DEMO'
-                      ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]'
-                      : activeBroker === 'BINANCE_LIVE' || activeBroker === 'BINANCE_TESTNET'
-                      ? 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]'
-                      : 'bg-cyan-400'
+                  className={`w-2.5 h-2.5 rounded-full ${
+                    (activeBroker === 'MT5_LIVE' || activeBroker === 'MT5_DEMO') && mt5Account.status === 'CONNECTED'
+                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                      : (activeBroker === 'BINANCE_LIVE' || activeBroker === 'BINANCE_TESTNET') && binanceAccount.status === 'CONNECTED'
+                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                      : 'bg-zinc-600'
                   }`}
                 />
                 <div>
-                  <div className="text-white font-medium text-[11px]">
+                  <div className="text-white font-bold text-xs">
                     {activeBroker === 'MT5_LIVE'
-                      ? 'MetaTrader 5 (Live MetaApi)'
+                      ? 'MetaTrader (MetaApi)'
                       : activeBroker === 'BINANCE_LIVE'
-                      ? 'Binance (Live Mainnet)'
+                      ? 'Binance Live Mainnet'
                       : activeBroker === 'MT5_DEMO'
-                      ? 'MetaTrader 5 Demo'
+                      ? 'MetaTrader Demo'
                       : activeBroker === 'BINANCE_TESTNET'
                       ? 'Binance Testnet'
-                      : 'محاكاة محلية'}
+                      : 'محاكاة تجريبية'}
                   </div>
-                  <div className="text-[#8F9CAE] text-[10px]">
-                    {activeBroker === 'MT5_LIVE'
-                      ? 'Live Cloud Gateway'
-                      : activeBroker === 'BINANCE_LIVE'
-                      ? 'api.binance.com'
-                      : activeBroker === 'MT5_DEMO'
-                      ? mt5Account.server
-                      : activeBroker === 'BINANCE_TESTNET'
-                      ? 'testnet.binance'
-                      : 'Sandbox'}
+                  <div className="text-[#8F9CAE] text-[10px] font-mono">
+                    {activeBroker === 'MT5_LIVE' || activeBroker === 'MT5_DEMO'
+                      ? mt5Account.server || 'adss-Live3'
+                      : 'Live Exchange'}
                   </div>
                 </div>
               </div>
               <div className="text-left font-mono">
-                <div className="text-emerald-400 font-bold text-xs">
+                <div className="text-emerald-400 font-black text-xs">
                   {activeBroker === 'MT5_LIVE' || activeBroker === 'MT5_DEMO'
-                    ? `$${mt5Account.balance.toLocaleString()}`
+                    ? `$${(mt5Account.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     : activeBroker === 'BINANCE_LIVE' || activeBroker === 'BINANCE_TESTNET'
-                    ? `${binanceAccount.balanceUSDT.toLocaleString()} USDT`
-                    : '$10,000'}
+                    ? `${(binanceAccount.balanceUSDT || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} USDT`
+                    : '$10,000.00'}
                 </div>
-                <div className="text-[9px] text-[#8F9CAE]">رصيد الحساب</div>
+                <div className="text-[9px] text-[#8F9CAE]">الرصيد الحي</div>
               </div>
             </div>
 
-            {/* Connect / Manage Broker Accounts Button */}
+            {/* Direct Connect / Manage Broker Modal Button */}
             <button
+              type="button"
               onClick={() => {
                 setIsProfileFlyoutOpen(false);
                 setIsModalOpen(true);
               }}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md bg-[#2962FF] hover:bg-[#1E53E5] text-white text-xs font-semibold transition-all shadow-sm cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black text-xs font-black transition-all shadow-md shadow-amber-500/20 cursor-pointer active:scale-95"
             >
-              <Settings size={13} />
-              <span>إدارة وربط حسابات الوسطاء (ربط وسيط ⚙️)</span>
+              <Settings size={14} />
+              <span>إدارة وربط حسابات الوسطاء (MetaApi & Binance) ⚙️</span>
             </button>
           </div>
 

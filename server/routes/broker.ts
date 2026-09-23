@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { getKey } from '../keyManager.js';
+import { getKey, setKey } from '../keyManager.js';
 import crypto from 'crypto';
 
 const router = Router();
@@ -481,7 +481,6 @@ router.post('/test-connection', async (req: Request, res: Response) => {
 
         // Save valid credentials to keyManager for future requests
         try {
-          const { setKey } = await import('../keyManager.js');
           setKey('mt5', token);
           setKey('mt5_account_id', accId);
           console.log('[MetaApi] Credentials saved to keyManager');
@@ -539,6 +538,93 @@ router.post('/test-connection', async (req: Request, res: Response) => {
         error: err.name === 'AbortError'
           ? 'Connection timed out (>10s). Check your network and MetaApi credentials.'
           : err.message,
+      });
+    }
+  }
+
+  if (broker === 'binance') {
+    const { apiKey, apiSecret, network, isLive } = req.body;
+    const key = (apiKey || getKey('binance') || '').trim();
+    const secret = (apiSecret || getKey('binance_secret') || '').trim();
+
+    if (!key || !secret) {
+      return res.status(400).json({
+        success: false,
+        status: 'ERROR',
+        error: 'Binance API Key and Secret are required',
+      });
+    }
+
+    try {
+      const isFutures = network === 'futures';
+      const baseUrl = isFutures
+        ? (isLive !== false ? 'https://fapi.binance.com' : 'https://testnet.binancefuture.com')
+        : (isLive !== false ? 'https://api.binance.com' : 'https://testnet.binance.vision');
+
+      const endpoint = isFutures ? '/fapi/v2/account' : '/api/v3/account';
+      const timestamp = Date.now();
+      const queryString = `timestamp=${timestamp}`;
+      const signature = signHmacSha256(secret, queryString);
+
+      const binanceRes = await fetch(`${baseUrl}${endpoint}?${queryString}&signature=${signature}`, {
+        headers: { 'X-MBX-APIKEY': key },
+      });
+
+      if (binanceRes.ok) {
+        const data = await binanceRes.json();
+        let balanceUSDT = 0;
+        let availableUSDT = 0;
+
+        if (isFutures && data.assets) {
+          const usdt = data.assets.find((a: any) => a.asset === 'USDT');
+          if (usdt) {
+            balanceUSDT = parseFloat(usdt.walletBalance || '0');
+            availableUSDT = parseFloat(usdt.availableBalance || '0');
+          }
+        } else if (data.balances) {
+          const usdt = data.balances.find((b: any) => b.asset === 'USDT');
+          if (usdt) {
+            balanceUSDT = parseFloat(usdt.free || '0') + parseFloat(usdt.locked || '0');
+            availableUSDT = parseFloat(usdt.free || '0');
+          }
+        }
+
+        try {
+          setKey('binance', key);
+          setKey('binance_secret', secret);
+          console.log('[Binance] Credentials saved to keyManager');
+        } catch (saveErr) {
+          console.warn('[Binance] Could not persist credentials:', saveErr);
+        }
+
+        return res.json({
+          success: true,
+          status: 'CONNECTED',
+          binance: {
+            balanceUSDT,
+            availableUSDT,
+            totalWalletBalance: balanceUSDT,
+            network: network || 'futures',
+            status: 'CONNECTED',
+            isLive: isLive !== false,
+          },
+        });
+      } else {
+        const errText = await binanceRes.text().catch(() => '');
+        let parsedErr: any = {};
+        try { parsedErr = JSON.parse(errText); } catch {}
+        return res.status(binanceRes.status).json({
+          success: false,
+          status: 'ERROR',
+          error: parsedErr.msg || `Binance returned HTTP ${binanceRes.status}`,
+          details: errText,
+        });
+      }
+    } catch (err: any) {
+      return res.status(500).json({
+        success: false,
+        status: 'ERROR',
+        error: err.message || 'Failed to connect to Binance',
       });
     }
   }
