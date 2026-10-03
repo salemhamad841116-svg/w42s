@@ -265,27 +265,12 @@ class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// ─── Main App with Auth Guard ───
+// ─── Main App ───
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return loadSession() !== null;
-  });
-
-  const handleLogin = useCallback((email: string) => {
-    setIsAuthenticated(true);
-    console.log(`Super Admin authenticated: ${email}`);
-  }, []);
-
-  // Fetch live account data on authentication
+  // Fetch live account data on mount
   useEffect(() => {
-    if (isAuthenticated) {
-      useBrokerStore.getState().fetchLiveAccountData();
-    }
-  }, [isAuthenticated]);
-
-  if (!isAuthenticated) {
-    return <LoginScreen onLogin={handleLogin} />;
-  }
+    useBrokerStore.getState().fetchLiveAccountData();
+  }, []);
 
   return (
     <ErrorBoundary>
